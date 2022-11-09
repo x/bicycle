@@ -1,0 +1,44 @@
+{
+    "python.defaultInterpreterPath": "~/.pyenv/versions/3.10.3/envs/bicycle-3.10.3/bin/python",
+    "python.analysis.extraPaths": [
+      "~/.pyenv/versions/3.10.3/envs/bicycle-3.10.3/bin/"
+    ],
+    "python.analysis.diagnosticSeverityOverrides": {
+      "reportOptionalCall": "none", // annoying error with justpy
+    },
+
+  
+    "python.linting.pylintEnabled": false,
+
+    "python.linting.flake8Enabled": true,
+    "python.linting.flake8Path": "~/.pyenv/versions/3.10.3/envs/bicycle-3.10.3/bin/flake8",
+    "python.linting.flake8Args": [
+      "--config=${workspaceFolder}/.flake8"
+    ],
+    
+    "python.linting.mypyEnabled": true,
+    "python.linting.mypyPath": "~/.pyenv/versions/3.10.3/envs/bicycle-3.10.3/bin/mypy",
+    "python.linting.mypyArgs": [
+      "--namespace-packages",
+      "--config-file=pyproject.toml"
+    ],
+
+    "editor.formatOnSave": true,
+    "python.formatting.provider": "black",
+    "python.formatting.blackPath": "~/.pyenv/versions/3.10.3/envs/bicycle-3.10.3/bin/black",
+
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    },
+    "isort.args": [
+      "--settings-path=${workspaceFolder}/pyproject.toml"
+    ],
+
+    "files.exclude": {
+      "**/.git": true,
+      "**/.DS_Store": true,
+      "**/*.pyc": true,
+      "**/__pycache__": true,
+      "**/.mypy_cache": true,
+    },
+}

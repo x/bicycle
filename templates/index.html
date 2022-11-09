@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<hgroup>
+    <h1>Devon's Dope BigQuery Asker</h1>
+    <h3>A nifty query tool that queries public bigquery datasets with natural language.</h3>
+</hgroup>
+<input type="search" name="query" placeholder="Ask me anything..." / hx-post="/query"
+    hx-trigger="keyup changed delay:1000ms" hx-indicator=".htmx-indicator" hx-target="#results" _="on htmx:afterOnLoad take .selected for event.target">
+<span class="htmx-indicator">Thinking...</span>
+<div id="results">
+</div>
+{% endblock content %}
+
+{% block footer %}
+<script src="//unpkg.com/@highlightjs/cdn-assets@11.6.0/highlight.min.js"></script>
+<script>
+document.body.addEventListener("afterResponse", function(evt){
+  document.querySelectorAll('code').forEach(el => {
+    hljs.highlightElement(el);
+  });
+});
+</script>
+{% endblock footer %}
