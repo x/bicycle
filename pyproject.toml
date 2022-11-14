@@ -11,6 +11,7 @@ openai = "^0.25.0"
 Flask = "^2.2.2"
 python-dotenv = "^0.21.0"
 pandas = "^1.5.1"
+sqlparse = "^0.4.3"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.10.0"
@@ -23,7 +24,7 @@ python_version = 3.10
 ignore_missing_imports = true
 no_implicit_optional = true
 warn_redundant_casts = true
-warn_unused_ignores = true
+warn_unused_ignores = false
 no_warn_no_return = true
 warn_unreachable = true
 allow_redefinition = false

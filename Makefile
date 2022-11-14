@@ -54,7 +54,7 @@ nuke:
 
 # Dev
 up:
-	FLASK_DEBUG=1 ${VENV}/bin/python -m flask --app server run
+	FLASK_DEBUG=1 ${VENV}/bin/python -m flask --app bicycle run
 
 # Formatting
 format:
