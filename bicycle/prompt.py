@@ -2,6 +2,7 @@ import json
 import os
 
 import openai
+import sqlparse
 
 from .tables import (
     CITIBIKE_STATIONS_FIELDS,
@@ -50,10 +51,25 @@ Gopher: SELECT boats.id AS boat_id, boats.name AS boat_name, COUNT(*) AS count F
 CITIBIKE_PROMPT = f"""
 {GOPHER_PROMPT_PREAMBLE}
 {SQL_PREAMBLE}
-User: Given the BigQuery table '{CITIBIKE_TRIPS_NAME}' with fields '{CITIBIKE_TRIPS_FIELDS}' and the table '{CITIBIKE_STATIONS_NAME}' with fields '{CITIBIKE_STATIONS_FIELDS}' what's a BigQuery query that answers the question '%s'
+User: Given the BigQuery table '{CITIBIKE_TRIPS_NAME}' with fields '{json.dumps(CITIBIKE_TRIPS_FIELDS)}' and the table '{CITIBIKE_STATIONS_NAME}' with fields '{json.dumps(CITIBIKE_STATIONS_FIELDS)}' what's a BigQuery query that answers the question '%s'
 Gopher:"""
 
 ENGINE = "code-davinci-002"
+
+
+def clean_code(code: str) -> str:
+    code = code.replace("Gopher:", "").replace("User:", "")
+    code = sqlparse.format(
+        code,
+        reindent=True,
+        keyword_case="upper",
+        strip_comments=True,
+    )
+    print("cleaned code:", code)
+    code = code.replace("`citibike_stations`", f"`{CITIBIKE_STATIONS_NAME}`")
+    code = code.replace("`citibike_trips`", f"`{CITIBIKE_TRIPS_NAME}`")
+    print("cleaned code:", code)
+    return code
 
 
 def question_to_code(question: str) -> str:
@@ -66,7 +82,10 @@ def question_to_code(question: str) -> str:
         max_tokens=256,
         stop="User:",
         n=1,
+        best_of=4,
     )
     completion = response.choices[0].text  # type: ignore
     print("completion:", completion)
-    return completion
+    code = clean_code(completion)
+    print("code:", code)
+    return code

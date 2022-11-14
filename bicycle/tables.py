@@ -1,4 +1,4 @@
-CITIBIKE_STATIONS_NAME = "citibike_stations"
+CITIBIKE_STATIONS_NAME = "bigquery-public-data.new_york.citibike_stations"
 CITIBIKE_STATIONS_FIELDS = [
     {
         "name": "station_id",
@@ -128,7 +128,7 @@ CITIBIKE_STATIONS_FIELDS = [
     },
 ]
 
-CITIBIKE_TRIPS_NAME = "citibike_trips"
+CITIBIKE_TRIPS_NAME = "bigquery-public-data.new_york.citibike_trips"
 CITIBIKE_TRIPS_FIELDS = [
     {
         "name": "tripduration",
