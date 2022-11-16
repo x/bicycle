@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import traceback as tb
 from random import sample
 from time import sleep
 from typing import Tuple
@@ -74,4 +75,5 @@ def query():
     except Exception as e:
         logging.exception(e)
         table = "<p>Sorry, I couldn't run that query.</p>"
+        table += f"<pre><code>{tb.format_exc()}</code></pre>"
     return format_response(code, table)
