@@ -56,6 +56,9 @@ nuke:
 up:
 	FLASK_DEBUG=1 ${VENV}/bin/python -m flask --app bicycle run
 
+sqlite:
+	LD_PATH="$LD_PATH:/opt/homebrew/lib/" /opt/homebrew/opt/sqlite3/bin/sqlite3 citibike.db
+
 # Formatting
 format:
 	poetry run black . && poetry run isort .

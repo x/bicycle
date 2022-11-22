@@ -1,29 +1,29 @@
 import json
 import logging
+import math
 import os
+import sqlite3
 import traceback as tb
+from pathlib import Path
 from random import sample
+from string import Template
 from time import sleep
 from typing import Tuple
 
 import openai
 import pandas as pd
+import sqlparse
 from dotenv import load_dotenv
 from flask import Flask, g, make_response, render_template, request
 from flask.wrappers import Response
-from google.cloud import bigquery
-
-from .prompt import question_to_code
 
 app = Flask(__name__)
 
+SQLLITE_DB_PATH = "citibike.db"
 
-def get_openai():
-    if "openai" not in g:
-        load_dotenv()
-        openai.api_key = os.environ["OPENAI_API_KEY"]
-        g.openai = openai
-    return g.openai
+ENGINE = "code-davinci-002"
+
+BOT_NAME = "Billy"
 
 
 def get_test_data() -> Tuple[str, str]:
@@ -34,9 +34,56 @@ def get_test_data() -> Tuple[str, str]:
     return code, df_to_table_html(df)
 
 
-@app.route("/")
-def index():
-    return render_template("index.html")
+def setup_math_functions(conn) -> None:
+    """Setup the math functions for SQLite.
+
+    It's not clear to me why this extention isn't there by default....
+
+    See:
+        https://www.sqlite.org/lang_mathfunc.html
+
+    Interestingly, this could be a cool way for us to extend the SQL.
+    """
+    conn.create_function("log", 2, math.log)
+    conn.create_function("sqrt", 1, math.sqrt)
+    conn.create_function("pow", 2, math.pow)
+    conn.create_function("exp", 1, math.exp)
+    conn.create_function("pi", 0, math.pi)
+
+
+def clean_code(code: str) -> str:
+    """Clean up the SQL to look nice."""
+    code = code.replace(f"{BOT_NAME}:", "").replace("User:", "")
+    code = sqlparse.format(
+        code,
+        reindent=True,
+        keyword_case="upper",
+        strip_comments=True,
+    )
+    code = code.replace(
+        "bigquery-PUBLIC-data", "bigquery-public-data"
+    )  # bad sqlparse.format
+    return code
+
+
+def question_to_code(question: str) -> str:
+    prompt_str = (
+        Path("./bicycle/prompts/preamble01.txt.tpl").read_text()
+        + Path("./bicycle/prompts/citibike.txt.tpl").read_text()
+    )
+    prompt = Template(prompt_str).substitute(bot_name=BOT_NAME, question=question)
+    openai.api_key = os.environ["OPENAI_API_KEY"]
+    response = openai.Completion.create(
+        engine=ENGINE,
+        prompt=prompt,
+        max_tokens=512,
+        stop="________",
+        n=1,
+        best_of=4,
+    )
+    completion = response.choices[0].text  # type: ignore
+    code = clean_code(completion)
+    return code
 
 
 def format_response(code: str, table_html: str) -> Response:
@@ -46,11 +93,12 @@ def format_response(code: str, table_html: str) -> Response:
     return resp
 
 
-def query_bq(code: str) -> pd.DataFrame:
-    """Query BigQuery and return a dataframe."""
-    client = bigquery.Client()
-    query_job = client.query(code)
-    df = query_job.to_dataframe()
+def query_sqlite(code: str) -> pd.DataFrame:
+    """Query SQLite and return a dataframe."""
+    conn = sqlite3.connect(SQLLITE_DB_PATH)
+    setup_math_functions(conn)
+    res = conn.execute(code)
+    df = pd.DataFrame(res.fetchall(), columns=[x[0] for x in res.description])
     return df
 
 
@@ -59,6 +107,12 @@ def df_to_table_html(df: pd.DataFrame) -> str:
     html = df.to_html()
     html = html.replace('border="1"', "")  # Let pico.css do this
     return html
+
+
+# Routes
+@app.route("/")
+def index():
+    return render_template("index.html")
 
 
 @app.route("/query", methods=["POST"])
@@ -70,7 +124,7 @@ def query():
         return render_template("noquery.html")
     code = question_to_code(question)
     try:
-        df = query_bq(code)
+        df = query_sqlite(code)
         table = df_to_table_html(df)
     except Exception as e:
         logging.exception(e)
