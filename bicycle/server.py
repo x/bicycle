@@ -71,7 +71,7 @@ def question_to_code(question: str) -> str:
         max_tokens=512,
         stop="________",
         n=1,
-        temperature=0.,
+        temperature=0.0,
         best_of=4,
     )
     return response.choices[0].text  # type: ignore
