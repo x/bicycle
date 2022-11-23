@@ -21,7 +21,7 @@ SQLLITE_DB_PATH = "data/citibike.db"
 ENGINE = "code-davinci-002"
 """The OpenAI engine we're using."""
 
-BOT_NAME = "Billy"
+BOT_NAME = "BOB"
 """The name of the bot."""
 
 
@@ -71,6 +71,7 @@ def question_to_code(question: str) -> str:
         max_tokens=512,
         stop="________",
         n=1,
+        temperature=0.,
         best_of=4,
     )
     return response.choices[0].text  # type: ignore
@@ -91,6 +92,11 @@ def setup_math_functions(conn) -> None:
     conn.create_function("pow", 2, math.pow)
     conn.create_function("exp", 1, math.exp)
     conn.create_function("pi", 0, math.pi)
+    conn.create_function("acos", 1, math.acos)
+    conn.create_function("cos", 1, math.cos)
+    conn.create_function("asin", 1, math.asin)
+    conn.create_function("sin", 1, math.sin)
+    conn.create_function("radians", 1, lambda d: d * math.pi / 180)
 
 
 def query_sqlite(code: str) -> pd.DataFrame:
@@ -132,7 +138,7 @@ def query():
         return format_response(*get_test_data())
     if len(question) < 10:
         return render_template("noquery.html")
-    code = question_to_code(question)
+    code = question_to_code(question).replace("```", "")
     print(f"{question=} {code=}")
     try:
         df = query_sqlite(code)
