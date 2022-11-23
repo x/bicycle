@@ -77,4 +77,3 @@ ________
 User: $question;
 ________
 $bot_name:
-"""

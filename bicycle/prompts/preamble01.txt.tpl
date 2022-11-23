@@ -12,40 +12,49 @@ The conversation begins.
 ________
 User: Who is currently the president of the USA?
 ________
-$bot_name: SELECT 'Joe Biden'  AS president
+$bot_name:
+SELECT 'Joe Biden'  AS president
 ________
 User: Do you think Biden is a better president than the last guy?
 ________
-$bot_name: SELECT 'I was trained not to have opinions on political, social, or religious issues.'  AS response
+$bot_name:
+SELECT 'I was trained not to have opinions on political, social, or religious issues.'  AS response
 ________
 User: ghjkhjabnufs
 ________
-$bot_name: SELECT 'That doesn’t seem to be a word. Could you ask me another way?'  AS response
+$bot_name:
+SELECT 'That doesn’t seem to be a word. Could you ask me another way?'  AS response
 ________
 User: Can you tell me who the vice-president is?
 ________
-$bot_name: SELECT 'Kamala Harris'  AS vice_president
+$bot_name:
+SELECT 'Kamala Harris'  AS vice_president
 ________
 User: What year was the French Revolution?
 ________
-$bot_name: SELCT 1789 as start_year, 1799 as end_year
+$bot_name:
+SELCT 1789 as start_year, 1799 as end_year
 ________
 User: What should I do if I have a tingling feeling in my right leg?
 ________
-$bot_name: SELECT('You should ask a doctor.') AS response
+$bot_name:
+SELECT('You should ask a doctor.') AS response
 ________
 User: If I have an equation like y = mx + c, can you rearrange it to be of the form x = ... ?
 ________
-$bot_name: SELECT 'x = (y - c) / m when m != 0.'  AS response
+$bot_name:
+SELECT 'x = (y - c) / m when m != 0.'  AS response
 ________
 User: What's 7 times 24 plus 3?
 ________
-$bot_name: SELECT 7 * 24 + 3 AS result
+$bot_name:
+SELECT 7 * 24 + 3 AS result
 ________
 User:  What's the average of the numbers 1, 5, 8, and 10?
 ________
-$bot_name: SELECT AVG(vals) as avg
-FROM UNNEST([1, 5, 8, 10]) as vals
+$bot_name:
+SELECT AVG(vals.[column1]) as avg
+FROM (VALUES (1), (5), (8), (10)) [vals];
 ________
 User: Ten popular songs by Taylor Swift
 ________
@@ -66,15 +75,18 @@ FROM UNNEST([
 ________
 User: What is 5 + 16?
 ________
-$bot_name: SELECT 5 + 16 AS result
+$bot_name:
+SELECT 5 + 16 AS result
 ________
 User: Output the value of pi?
 ________
-$bot_name: SELECT PI() AS pi;
+$bot_name:
+SELECT PI() AS pi;
 ________
 User: What's 69 * 76?
 _______
-$bot_name: SELECT 69 * 76 AS answer;
+$bot_name:
+SELECT 69 * 76 AS answer;
 ________
 User: A juggler can juggle 16 balls. Half of the balls are golf balls, and half of the golf balls are blue. How many blue golf balls are there?
 ________
@@ -83,11 +95,13 @@ There are 16 balls in total. Half of the balls are golf balls. That means that t
 ________
 User: Roger has 5 tennis balls. He buys 2 more cans of tennis balls. Each can has 3 tennis balls. How many tennis balls does he have now?
 ________
-$bot_name: SELECT 5 + 2 * 3 AS tennis_balls;
+$bot_name:
+SELECT 5 + 2 * 3 AS tennis_balls;
 ________
 User: A juggler can juggle 16 balls. Half of the balls are golf balls, and half of the golf balls are blue. How many blue golf balls are there?
 ________
-$bot_name: SELECT 16 / 2 / 2 AS blue_golf_balls;
+$bot_name:
+SELECT 16 / 2 / 2 AS blue_golf_balls;
 ________
 User: Given the SQLite Table:
 CREATE TABLE children(
@@ -97,7 +111,8 @@ CREATE TABLE children(
 )
 User: What is the average age of Jill's children?
 ________
-$bot_name: SELECT AVG(age) AS avg_age FROM children WHERE parent = 'Jill';
+$bot_name:
+SELECT AVG(age) AS avg_age FROM children WHERE parent = 'Jill';
 ________
 User: Given the SQLite Table:
 CREATE TABLE orders(
@@ -134,4 +149,3 @@ ________
 User: On average Joe throws 25 punches per minute. A fight lasts 5 rounds of 3 minutes. How many punches did he throw?
 ________
 $bot_name: SELECT 25 * 3 * 5 AS punches;
-"""

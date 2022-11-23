@@ -1,0 +1,34 @@
+/* Copied from the pico docs improve the code blocks in article footers */
+article pre, article pre code {
+    margin-bottom: 0;
+    background: 0 0;
+    background-image: initial;
+    background-position-x: 0px;
+    background-position-y: 0px;
+    background-size: initial;
+    background-attachment: initial;
+    background-origin: initial;
+    background-clip: initial;
+    background-color: initial;
+}
+
+/* Don't let hilight js set the background color either. */
+.hljs {
+    background-color: initial;
+}
+
+/* Behavior for loader when request is made and .htmx-request is appended. */ 
+#loader{
+    display: none;
+}
+.htmx-request #loader{
+    display: block;
+}
+
+/* Inverse behavior the results. */ 
+#results{
+    display: block;
+}
+.htmx-request #results{
+    display: none;
+}

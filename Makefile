@@ -61,7 +61,7 @@ up:
 	FLASK_DEBUG=1 ${VENV}/bin/python -m flask --app bicycle run
 
 sqlite:
-	LD_PATH="$LD_PATH:/opt/homebrew/lib/" ${BREW_SQLITE} citibike.db
+	LD_PATH="$LD_PATH:/opt/homebrew/lib/" ${BREW_SQLITE} data/citibike.db
 
 # Formatting
 format:
