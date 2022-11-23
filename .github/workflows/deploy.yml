@@ -26,6 +26,10 @@ jobs:
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
+      # Setup .env file (there must be a better way to do this...)
+      - id: 'Env'
+        run: echo 'OPENAI_API_KEY=${{ secrets.GCP_SA_KEY }} > .env'
+
       # Deploy to App Engine
       - id: Deploy
         uses: 'google-github-actions/deploy-appengine@v0'
