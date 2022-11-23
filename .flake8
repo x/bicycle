@@ -1,0 +1,29 @@
+[flake8]
+max-line-length = 100
+max-complexity = 15
+filename = *.py*
+exclude =
+    .git,
+    __pycache__,
+    .mypy_cache,
+    build,
+    _build,
+    dist,
+    data,
+    .python-version,
+
+ignore =
+    # E203: whitespace before ‘:’ (incompatible with Black)
+    E203,
+    # W503: line break before binary operator (incompatible with Black)
+    W503,
+    # PLC0209: Formatting could be an f-string; too opinionated
+    PLC0209,
+    # PLW0511: Fixmes and TODOs
+    PLW0511,
+    # PLC0413: trust isort to make the decision for us
+    PLC0413,
+
+per-file-ignores =
+    # Init files will sometimes have unused imports.
+    __init__.py: F401
