@@ -1,17 +1,9 @@
-<article>
-
-    <body>
-        <h2>Results</h2>
-        <figure>
-            {{ html|safe }}
-        </figure>
-    </body>
-    <footer>
-        <h2>Query Used</h2>
-        <pre background:none>
-            <code class="language-sql">
-                {{ code }}
-            </code>
-        </pre>
-    </footer>
-</article>
+<h3>Results</h3>
+<figure>{{ html|safe }}</figure>
+<footer>
+    <hgroup>
+        <h3>Generated Query</h3>
+        <h4>SQLite query generated to answer "{{ question }}"</h4>
+    </hgroup>
+    <pre><code class="language-sql">{{ code }}</code></pre>
+</footer>
