@@ -18,7 +18,7 @@ jobs:
       - run: poetry check
 
       # App Engine requires a requirements.txt, but we must prune out the hashes and version restrictions poetry inserts
-      - run: poetry export -f requirements.txt --without=dev --without-hashes -o requirements.txt | cut -d';' -f1 > requirements.txt"
+      - run: poetry export -f requirements.txt --without=dev --without-hashes -o requirements.txt | cut -d';' -f1 > requirements.txt
 
       # Setup Auth
       - id: 'Auth'
