@@ -1,4 +1,3 @@
-import json
 import logging
 import math
 import os
@@ -14,16 +13,22 @@ import openai
 import pandas as pd
 import sqlparse
 from dotenv import load_dotenv
-from flask import Flask, g, make_response, render_template, request
+from flask import Flask, make_response, render_template, request
 from flask.wrappers import Response
 
-app = Flask(__name__)
-
-SQLLITE_DB_PATH = "citibike.db"
+SQLLITE_DB_PATH = "data/citibike.db"
+"""The path to the SQLite DB."""
 
 ENGINE = "code-davinci-002"
+"""The OpenAI engine we're using."""
 
 BOT_NAME = "Billy"
+"""The name of the bot."""
+
+
+# Setup
+load_dotenv()
+app = Flask(__name__)
 
 
 def get_test_data() -> Tuple[str, str]:
@@ -32,23 +37,6 @@ def get_test_data() -> Tuple[str, str]:
     df = pd.DataFrame({k: sample(range(0, 100), 15) for k in ["Foo", "Bar", "Baz"]})
     code = "SELECT foo, bar, baz\nFROM test_table\nWHERE foo < 100"
     return code, df_to_table_html(df)
-
-
-def setup_math_functions(conn) -> None:
-    """Setup the math functions for SQLite.
-
-    It's not clear to me why this extention isn't there by default....
-
-    See:
-        https://www.sqlite.org/lang_mathfunc.html
-
-    Interestingly, this could be a cool way for us to extend the SQL.
-    """
-    conn.create_function("log", 2, math.log)
-    conn.create_function("sqrt", 1, math.sqrt)
-    conn.create_function("pow", 2, math.pow)
-    conn.create_function("exp", 1, math.exp)
-    conn.create_function("pi", 0, math.pi)
 
 
 def clean_code(code: str) -> str:
@@ -86,11 +74,21 @@ def question_to_code(question: str) -> str:
     return code
 
 
-def format_response(code: str, table_html: str) -> Response:
-    """Format the response to be returned to the user."""
-    resp = make_response(render_template("response.html", html=table_html, code=code))
-    resp.headers["HX-Trigger-After-Swap"] = "afterResponse"
-    return resp
+def setup_math_functions(conn) -> None:
+    """Setup the math functions for SQLite.
+
+    It's not clear to me why this extention isn't there by default....
+
+    See:
+        https://www.sqlite.org/lang_mathfunc.html
+
+    Interestingly, this could be a cool way for us to extend the SQL.
+    """
+    conn.create_function("log", 2, math.log)
+    conn.create_function("sqrt", 1, math.sqrt)
+    conn.create_function("pow", 2, math.pow)
+    conn.create_function("exp", 1, math.exp)
+    conn.create_function("pi", 0, math.pi)
 
 
 def query_sqlite(code: str) -> pd.DataFrame:
@@ -107,6 +105,13 @@ def df_to_table_html(df: pd.DataFrame) -> str:
     html = df.to_html()
     html = html.replace('border="1"', "")  # Let pico.css do this
     return html
+
+
+def format_response(code: str, table_html: str) -> Response:
+    """Format the response to be returned to the user."""
+    resp = make_response(render_template("response.html", html=table_html, code=code))
+    resp.headers["HX-Trigger-After-Swap"] = "afterResponse"
+    return resp
 
 
 # Routes

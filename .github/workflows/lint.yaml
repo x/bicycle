@@ -22,7 +22,7 @@ jobs:
           cache: 'poetry'
       - run: poetry check
       - run: poetry install
-      - run: poetry run flake8 .
-      - run: poetry run mypy .
+      - run: poetry run flake8 --config=./.flake8 .
+      - run: poetry run mypy --config-file=pyproject.toml .
       - run: poetry run black --check .
       - run: poetry run isort --check .
