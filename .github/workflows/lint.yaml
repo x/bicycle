@@ -22,7 +22,7 @@ jobs:
           cache: 'poetry'
       - run: poetry check
       - run: poetry install
-      - run: flake8 .
-      - run: mypy .
-      - run: black --check .
-      - run: isort --check .
+      - run: poetry run flake8 .
+      - run: poetry run mypy .
+      - run: poetry run black --check .
+      - run: poetry run isort --check .
