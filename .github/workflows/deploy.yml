@@ -1,0 +1,33 @@
+name: deploy
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  deploy-code:
+    runs-on: ubuntu-20.04
+    environment: Production
+    steps:
+      - uses: actions/checkout@v2
+      - run: pipx install poetry
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.10.3
+          cache: 'poetry'
+      - run: poetry check
+
+      # App Engine requires a requirements.txt, but we must prune out the hashes and version restrictions poetry inserts
+      - run: poetry export -f requirements.txt --without=dev --without-hashes -o requirements.txt | cut -d';' -f1 > requirements.txt
+
+      # Setup Auth
+      - id: 'Auth'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      # Deploy to App Engine
+      - id: Deploy
+        uses: 'google-github-actions/deploy-appengine@v0'
+        with:
+          deliverables: 'app.yaml'
