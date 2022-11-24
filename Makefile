@@ -34,7 +34,7 @@ ${VENV}: ${PYENV}
 	arch -x86_64 /usr/local/bin/pyenv virtualenv ${PYVERSION} ${VENV_NAME}
 	${VENV}/bin/python -m pip install -U pip setuptools wheel
 	${VENV}/bin/python -m pip install -U poetry
-
+Ø∏
 .python-version: ${VENV}
 	echo ${VENV_NAME} >.python-version
 
@@ -42,7 +42,6 @@ ${EGGLINK}: poetry.lock
 	PYENV_VERSION=${NAME} VIRTUAL_ENV=${VENV} ${VENV}/bin/poetry install
 	# an update-install might not necessarily update this
 	touch ${EGGLINK}
-
 
 # General repo and env managements
 setup: .python-version ${EGGLINK}
