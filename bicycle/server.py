@@ -45,7 +45,7 @@ def get_test_data() -> Tuple[str, str, str]:
 
 def clean_code(code: str) -> str:
     """Clean up the SQL to look nice."""
-    code = code.replace(f"{BOT_NAME}:", "").replace("User:", "")
+    code = code.replace(f"{BOT_NAME}:", "").replace("USER:", "")
     code = sqlparse.format(
         code,
         reindent=True,
@@ -63,12 +63,12 @@ def question_to_code(question: str) -> str:
         Path("./bicycle/prompts/preamble01.txt.tpl").read_text()
         + Path("./bicycle/prompts/citibike.txt.tpl").read_text()
     )
-    prompt = Template(prompt_str).substitute(bot_name=BOT_NAME, question=question)
+    prompt = Template(prompt_str).substitute(question=question)
     openai.api_key = os.environ["OPENAI_API_KEY"]
     response = openai.Completion.create(
         engine=ENGINE,
         prompt=prompt,
-        max_tokens=512,
+        max_tokens=1000,
         stop="________",
         n=1,
         temperature=0.0,

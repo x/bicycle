@@ -72,9 +72,53 @@ Its first five rows:
 368,Carmine St & 6 Ave,5763.03,40.73038599,-74.00214988,71,"CREDITCARD, KEY",0,false,0,0,0,0,false,false,false,false,1970-01-02 00:00:00
 ``` 
 
+Also, the schemas for both tables are here:
+```
+CREATE TABLE trips(
+  tripduration            INT,  -- Trip Duration (in seconds)
+  starttime               TEXT, -- Start Time, in NYC local time.
+  stoptime                TEXT, -- Stop Time, in NYC local time.
+  start_station_id        INT,  -- Start Station ID
+  start_station_name      TEXT, -- Start Station Name
+  start_station_latitude  NUM,  -- Start Station Latitude
+  start_station_longitude NUM,  -- Start Station Longitude
+  end_station_id          INT,  -- End Station ID
+  end_station_name        TEXT, -- End Station Name
+  end_station_latitude    NUM,  -- End Station Latitude
+  end_station_longitude   NUM,  -- End Station Longitude
+  bikeid                  INT,  -- Bike ID
+  usertype                TEXT, -- User Type (Customer = 24-hour pass or 7-day pass user, Subscriber = Annual Member)
+  birth_year              INT,  -- Year of Birth
+  gender                  TEXT, -- Gender (unknown, male, female)
+  customer_plan           TEXT  -- The name of the plan that determines the rate charged for the trip
+);
+
+
+CREATE TABLE stations(
+  station_id                INT,  -- Unique identifier of a station.
+  name                      TEXT, -- Public name of the station.
+  short_name                TEXT, -- Short name or other type of identifier, as used by the data publisher.
+  latitude                  NUM,  -- The latitude of station. The field value must be a valid WGS 84 latitude in decimal degrees format.
+  longitude                 NUM,  -- The longitude of station. The field value must be a valid WGS 84 longitude in decimal degrees format.
+  region_id                 INT,  -- ID of the region where station is located.
+  rental_methods            TEXT, -- Array of enumerables containing the payment methods accepted at this station.
+  capacity                  INT,  -- ANumber of total docking points installed at this station, both available and unavailable.
+  eightd_has_key_dispenser  INT,  -- Is the station equipped with a key dispenser
+  num_bikes_available       INT,  -- Number of bikes available for rental.
+  num_bikes_disabled        INT,  -- Number of disabled bikes at the station.
+  num_docks_available       INT,  -- Number of docks accepting bike returns.
+  num_docks_disabled        INT,  -- Number of empty but disabled dock points at the station.
+  is_installed              INT,  -- Is the station currently on the street?
+  is_renting                INT,  -- Is the station currently renting bikes?
+  is_returning              INT,  -- Is the station accepting bike returns?
+  eightd_has_available_keys INT,  -- Is the station capable of dispensing keys
+  last_reported             TEXT -- Timestamp indicating the last time this station reported its status to the backend, in NYC local time.
+);
+```
+
 station_id in this table maps to station ID's in the trips table.
 
-Give me number of trips that end at the Citibike station closest to Times Square, using the Haversine formula to calculate the closest stations to Times Square.
+Give me number of trips that end at the Citibike station closest to Times Square
 ________
 BOB: Let's think step by step.
 
@@ -84,20 +128,16 @@ BOB: Let's think step by step.
 WITH distances_from_times_square AS (
   SELECT
     *,
-    (
-      6371 * acos(
-        cos(radians(40.758896)) * cos(radians(latitude)) * cos(radians(longitude) - radians(-73.985131)) + sin(radians(40.758896)) * sin(radians(latitude))
-      )
-    ) AS distance_from_times_square
-  FROM stations
-), -- then, let's get the station closest to Times Square
+    SQRT(POW(40.758896 - end_station_latitude, 2) + POW(-73.985131 - end_station_longitude, 2)) AS distance_from_times_square
+  FROM stations  -- then, let's get the station closest to Times Square
+),
 station_closest_to_times_square AS (
   SELECT
     *
   FROM distances_from_times_square
   ORDER BY distance_from_times_square
-  LIMIT 1
-) -- let's grab the number of trips that end at this particular station. This is our final step.
+  LIMIT 1 -- let's grab the number of trips that end at this particular station. This is our final step.
+)
 SELECT
   COUNT(*) AS trips
 FROM trips
@@ -120,8 +160,8 @@ WITH trips_with_ages AS (
   SELECT
     *
     strftime('%Y', starttime) - birth_year AS age
-  FROM trips
-) -- then, let's select all trips where the rider was 25 years old. This is our final step.
+  FROM trips -- then, let's select all trips where the rider was 25 years old. This is our final step.
+)
 SELECT
   *
 FROM trips_with_ages
@@ -140,8 +180,8 @@ WITH trips_with_overnight_travel AS (
       WHEN strftime('%Y-%m-%d', starttime) != strftime('%Y-%m-%d', stoptime) THEN 'yes'
       ELSE 'no'
     END AS overnight_travel
-  FROM trips
-) -- then, let's select all trips where the rider travelled overnight. This is our final step.
+  FROM trips -- then, let's select all trips where the rider travelled overnight. This is our final step.
+)
 SELECT
   *
 FROM trips_with_overnight_travel
@@ -157,12 +197,10 @@ WITH trips_with_speeds AS (
   SELECT
     *,
     (
-      6371 * acos(
-        cos(radians(start_station_latitude)) * cos(radians(end_station_latitude)) * cos(radians(end_station_longitude) - radians(start_station_longitude)) + sin(radians(start_station_latitude)) * sin(radians(end_station_latitude))
-      )
+      SQRT(POW(start_station_latitude - end_station_latitude, 2) + POW(start_station_longitude - end_station_longitude, 2)) AS distance
     ) / tripduration AS speed
-  FROM trips
-) -- let's select the fastest trip that was longer than 20 minutes. This is our final step.
+  FROM trips -- let's select the fastest trip that was longer than 20 minutes. This is our final step.
+)
 SELECT
   *
 FROM trips_with_speeds
@@ -181,8 +219,8 @@ WITH trips_with_start_and_end_latitudes AS (
     *,
     start_station_latitude AS start_latitude,
     end_station_latitude AS end_latitude
-  FROM trips
-) -- let's select all trips where the start latitude is the minimum and the end latitude is the maximum. This is our final step.
+  FROM trips -- let's select all trips where the start latitude is the minimum and the end latitude is the maximum. This is our final step.
+)
 SELECT
   *
 FROM trips_with_start_and_end_latitudes
@@ -207,20 +245,20 @@ WITH trips_with_start_and_end_latitudes AS (
     *,
     start_station_latitude AS start_latitude,
     end_station_latitude AS end_latitude
-  FROM trips
-), -- let's use a window function to grab the trip number for each bike ordered by time, so we can grab consecutive trips.
+  FROM trips -- let's use a window function to grab the trip number for each bike ordered by time, so we can grab consecutive trips.
+),
 trips_with_trip_numbers AS (
   SELECT
     *,
     ROW_NUMBER() OVER (PARTITION BY bikeid ORDER BY starttime) AS bike_trip_number
-  FROM trips_with_start_and_end_latitudes
-), -- let's grab the southernmost and northernmost stations.
+  FROM trips_with_start_and_end_latitudes -- let's grab the southernmost and northernmost stations.
+),
 southernmost_and_northernmost_stations AS (
   SELECT
     MIN(start_latitude) AS southernmost_station_latitude,
     MAX(end_latitude) AS northernmost_station_latitude
-  FROM trips_with_trip_numbers
-), -- let's grab all of the trips that started at the southernmost station
+  FROM trips_with_trip_numbers  -- let's grab all of the trips that started at the southernmost station
+),
 trips_that_started_at_southernmost_station AS (
   SELECT
     *
@@ -229,8 +267,8 @@ trips_that_started_at_southernmost_station AS (
     SELECT
       southernmost_station_latitude
     FROM southernmost_and_northernmost_stations
-  )
-), -- let's grab all of the trips that ended at the northernmost station
+  )  -- let's grab all of the trips that ended at the northernmost station
+),
 trips_that_ended_at_northernmost_station AS (
   SELECT
     *
@@ -239,71 +277,45 @@ trips_that_ended_at_northernmost_station AS (
     SELECT
       northernmost_station_latitude
     FROM southernmost_and_northernmost_stations
-  )
-), -- let's grab all of the trips that started at the southernmost station and ended at the northernmost station, and that were consecutive trips.
+  ) -- let's grab all of the trips that started at the southernmost station and ended at the northernmost station, and that were consecutive trips.
+),
 trips_that_started_at_southernmost_station_and_ended_at_northernmost_station_and_were_consecutive AS (
   SELECT
     *
   FROM trips_that_started_at_southernmost_station
   INNER JOIN trips_that_ended_at_northernmost_station
   ON trips_that_started_at_southernmost_station.bikeid = trips_that_ended_at_northernmost_station.bikeid
-  WHERE trips_that_started_at_southernmost_station.bike_trip_number = trips_that_ended_at_northernmost_station.bike_trip_number - 1
-) -- let's list all of the bike ID's involved in these trips. This is our final step.
+  WHERE trips_that_started_at_southernmost_station.bike_trip_number = trips_that_ended_at_northernmost_station.bike_trip_number - 1  -- let's list all of the bike ID's involved in these trips. This is our final step.
+)
 SELECT
   bikeid
 FROM trips_that_started_at_southernmost_station_and_ended_at_northernmost_station_and_were_consecutive
 ```
 ________
-USER: Grab all the bikes that started at the southernmost station and ended at the northernmost station, but made that journey in exactly three consecutive trips and in also less than five hours.
+USER: Which station is responsible for the longest rides?
 ________
 BOB: Let's think step by step.
 ```
--- let's create a trips_with_start_and_end_latitudes clause where we calculate the latitude of the start and end stations. This will give us our southernmost and northernmost stations when we need them for later on.
-WITH trips_with_start_and_end_latitudes AS (
-  SELECT
-    *,
-    start_station_latitude AS start_latitude,
-    end_station_latitude AS end_latitude
-  FROM trips
-), -- let's use a window function to grab the trip number for each bike ordered by time, so we can grab consecutive trips.
-trips_with_trip_numbers AS (
-  SELECT
-    *,
-    ROW_NUMBER() OVER (PARTITION BY bikeid ORDER BY starttime) AS bike_trip_number
-  FROM trips_with_start_and_end_latitudes
-), -- let's grab all of the trips that started at the southernmost station
-trips_that_started_at_southernmost_station AS (
-  SELECT
-    *
-  FROM trips_with_trip_numbers
-  WHERE start_latitude = (
-    SELECT
-      MIN(start_latitude)
-    FROM trips_with_trip_numbers
-  )
-), -- let's grab all of the trips that ended at the northernmost station
-trips_that_ended_at_northernmost_station AS (
-  SELECT
-    *
-  FROM trips_with_trip_numbers
-  WHERE end_latitude = (
-    SELECT
-      MAX(end_latitude)
-    FROM trips_with_trip_numbers
-  )
-), -- let's grab all of the trips that started at the southernmost station and ended at the northernmost station, where the end trip is exactly 3 - 1 = 2 apart in bike_trip_number from the start trip, and where the end trip's end time is not more than five hours after the start time of the start trip.
-trips_that_started_at_southernmost_station_and_ended_at_northernmost_station_and_were_two_apart AS (
-  SELECT
-    *
-  FROM trips_that_started_at_southernmost_station
-  INNER JOIN trips_that_ended_at_northernmost_station
-  ON trips_that_started_at_southernmost_station.bikeid = trips_that_ended_at_northernmost_station.bikeid
-  WHERE trips_that_started_at_southernmost_station.bike_trip_number = trips_that_ended_at_northernmost_station.bike_trip_number - 2
-  AND strftime('%s', trips_that_ended_at_northernmost_station.stoptime) - strftime('%s', trips_that_started_at_southernmost_station.starttime) < 5 * 60 * 60
-) -- let's list all of the bike ID's involved in these trips. This is our final step.
-SELECT
-  bikeid
-FROM trips_that_started_at_southernmost_station_and_ended_at_northernmost_station_and_were_two_apart
+WITH trips_with_start_and_end_latitudes AS
+  (SELECT *,
+          start_station_latitude AS start_latitude,
+          end_station_latitude AS end_latitude,
+          start_station_longitude AS start_longitude,
+          end_station_longitude AS end_longitude
+   FROM trips ),
+     trips_with_distances AS
+  (SELECT *,
+          SQRT(POW(start_station_latitude - end_station_latitude, 2) + POW(start_station_longitude - end_station_longitude, 2)) AS distance
+   FROM trips_with_start_and_end_latitudes ),
+     average_distances_by_start_station AS
+  (SELECT start_station_id,
+          AVG(distance) AS average_distance
+   FROM trips_with_distances
+   GROUP BY start_station_id )
+SELECT *
+FROM average_distances_by_start_station
+ORDER BY average_distance DESC
+LIMIT 1
 ```
 ________
 USER: {$question}
