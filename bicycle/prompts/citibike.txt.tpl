@@ -308,5 +308,5 @@ FROM trips_that_started_at_southernmost_station_and_ended_at_northernmost_statio
 ________
 USER: {$question}
 ________
-BOB: Let's think step by step.
+BOB: I think this SQL query best answers your query:
 ```

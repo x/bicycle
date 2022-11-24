@@ -7,15 +7,19 @@
 </hgroup>
 </br>
 <input type="search" name="query" placeholder="Ask me anything..." / hx-post="/query"
-  hx-trigger="keyup changed delay:1000ms" hx-indicator=".indicator" hx-target="#results"
+  hx-trigger="keyup changed delay:3s" hx-indicator=".indicator" hx-target="#results"
   _="on htmx:afterOnLoad take .selected for event.target">
 <!-- <article id="loader" class="htmx-indicator" aria-busy="true"></article> -->
 <div class="indicator">
   <article id="loader" aria-busy="true"></article>
   <article id="results">
     <h2>What is this?</h2>
-    <p>This is an attempt to build a decent natural language query interface for a simple dataset using <a href="https://openai.com/blog/openai-codex/">OpenAI's Codex</a> model.</p>
-    <p>The dataset its using is the public <a href="https://console.cloud.google.com/marketplace/details/city-of-new-york/nyc-citi-bike">BigQuery NYC Citi Bike Trips</a> exported to a SQLite instance. It contains information about the stations and a sample of 10K trips from <u>July 2013</u> to <u>May 2018</u> in New York City.</p>
+    <p>This is an attempt to build a decent natural language query interface for a simple dataset using <a
+        href="https://openai.com/blog/openai-codex/">OpenAI's Codex</a> model.</p>
+    <p>The dataset its using is the public <a
+        href="https://console.cloud.google.com/marketplace/details/city-of-new-york/nyc-citi-bike">BigQuery NYC Citi
+        Bike Trips</a> exported to a SQLite instance. It contains information about the stations and a sample of 10K
+      trips from <u>July 2013</u> to <u>May 2018</u> in New York City.</p>
   </article>
 </div>
 
