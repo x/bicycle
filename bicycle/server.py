@@ -74,7 +74,7 @@ def question_to_code(question: str) -> str:
         temperature=0.0,
         best_of=4,
     )
-    return response.choices[0].text  # type: ignore
+    return clean_code(response.choices[0].text)  # type: ignore
 
 
 def setup_math_functions(conn) -> None:
@@ -117,7 +117,6 @@ def df_to_table_html(df: pd.DataFrame) -> str:
 
 def format_response(question: str, code: str, table_html: str) -> Response:
     """Format the response to be returned to the user."""
-    code = clean_code(code)
     resp = make_response(
         render_template("response.html", html=table_html, code=code, question=question)
     )
