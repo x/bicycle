@@ -34,7 +34,7 @@ ${VENV}: ${PYENV}
 	arch -x86_64 /usr/local/bin/pyenv virtualenv ${PYVERSION} ${VENV_NAME}
 	${VENV}/bin/python -m pip install -U pip setuptools wheel
 	${VENV}/bin/python -m pip install -U poetry
-Ø∏
+
 .python-version: ${VENV}
 	echo ${VENV_NAME} >.python-version
 
